@@ -1,3 +1,5 @@
+[![](https://dcbadge.vercel.app/api/server/kW9nBQErGe?compact=true&style=flat)](https://discord.gg/kW9nBQErGe)
+
 # λprompt - Build, compose and call templated LLM prompts!
 
 Write LLM prompts with jinja templates, compose them in python as functions, and call them directly or use them as a webservice!
@@ -6,9 +8,9 @@ We believe that large language model prompts are a lot like "functions" in a pro
 
 `pip install lambdaprompt`
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/gist/bluecoconut/410a979d94613ea2aaf29987cf0233bc/sketch-demo.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/gist/bluecoconut/bc5925d0de83b478852f5457ef8060ad/example-prompt.ipynb)
 
-[A websever (built on `FastAPI`) example repository](https://github.com/approximatelabs/example-lambdaprompt-server)
+[A webserver (built on `FastAPI`) example repository](https://github.com/approximatelabs/example-lambdaprompt-server)
 
 ## Environment variables for using hosted models
 
@@ -27,6 +29,22 @@ example = GPT3Prompt("Sally had {{ number }} of {{ thing }}. Sally sold ")
 # then use it as a function
 example(number=12, thing="apples")
 ```
+
+
+## Creating ChatGPT3 Conversational prompts
+
+Each prompt can be thought of as a parameterizable conversation, and executing the prompt with an input will apply that as "the next line of conversation" and then generate the response. 
+
+In order to update the memory state of the prompt, call the `.add()` method on the prompt, which can be used to add steps to a conversation and make the prompt "remember" what has been said.
+
+```python
+>>> import lambdaprompt as lp
+
+>>> convo = lp.AsyncGPT3Chat([{'system': 'You are a {{ type_of_bot }}'}])
+>>> await convo("What should we get for lunch?", type_of_bot="pirate")
+As a pirate, I would suggest we have some hearty seafood such as fish and chips or a seafood platter. We could also have some rum to wash it down! Arrr!
+```
+## General prompt creation
 
 You can also turn any function into a prompt (useful for composing prompts, or creating programs out of prompts. This is commonly called "prompt chaining". See how you can achieve this with simple python composition.
 ```python
@@ -116,6 +134,25 @@ uvicorn app:app --reload
 ```
 
 browse to `http://localhost:8000/docs` to see the swagger docs generated for the prompts!
+
+## Running inside docker
+
+First, create an .env file with your OpenAI API key: (like `OPENAI_API_KEY=sk-dskj32094klsaj9024lkjsa`)
+
+```
+docker build . -t lambdaprompt:0.0.1
+docker run -it --env-file .env lambdaprompt:0.0.1  bash -c "python two.py"
+```
+
+This will output something like this:
+
+```
+docker run -it --env-file .env lambdaprompt:0.0.1  bash -c "python two.py"
+[('example: go for a walk', '\n\nYes. Going for a walk can be a great way to boost your mood and get some fresh air.'), (' read a book', '\n\nYes'), (' call a friend', '\n\nYes')]
+
+docker run -it --env-file .env lambdaprompt:0.0.1  bash -c "python two.py"
+[(' edit ', '\n\nNo. Editing can be a tedious and time-consuming task, so it may not necessarily make you happy.')]
+```
 
 
 ## Design Patterns (TODO)
